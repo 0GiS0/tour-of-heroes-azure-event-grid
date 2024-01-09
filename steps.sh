@@ -6,18 +6,33 @@ EVENT_GRID_SUBSCRIPTION="heroes-subscription"
 STORAGE_ACCOUNT_NAME="storeheroes"
 STORAGE_CONTAINER_NAME="pics"
 
+NGROK_ENDPOINT="https://fcd8-89-7-164-45.ngrok-free.app/webhook"
+
 # Create resource group
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
 # Azure Service Events
-az storage account create \
+STORAGE_RESOURCE_ID=$(az storage account create \
     --name $STORAGE_ACCOUNT_NAME \
     --resource-group $RESOURCE_GROUP \
     --location $LOCATION \
     --sku Standard_LRS \
-    --kind StorageV2
+    --kind StorageV2 \
+    --query "id" \
+    --output tsv)
 
+# Create a container
+az storage container create \
+    --name $STORAGE_CONTAINER_NAME \
+    --account-name $STORAGE_ACCOUNT_NAME \
+    --public-access blob
 
+# Subscribe to Azure Storage Events
+az eventgrid event-subscription create \
+    --name $EVENT_GRID_SUBSCRIPTION \
+    --source-resource-id $STORAGE_RESOURCE_ID \
+    --endpoint-type webhook \
+    --endpoint $NGROK_ENDPOINT
 
 
 # Create Event Grid Topic
@@ -38,13 +53,13 @@ az eventgrid event-subscription create \
     --name $EVENT_GRID_SUBSCRIPTION \
     --source-resource-id $TOPIC_RESOURCE_ID \
     --endpoint-type webhook \
-    --endpoint https://fcd8-89-7-164-45.ngrok-free.app/webhook
+    --endpoint $NGROK_ENDPOINT
 
 az eventgrid event-subscription create \
     --name $EVENT_GRID_SUBSCRIPTION-2 \
     --source-resource-id $TOPIC_RESOURCE_ID \
     --endpoint-type webhook \
-    --endpoint https://fcd8-89-7-164-45.ngrok-free.app/webhook
+    --endpoint $NGROK_ENDPOINT
 
 # Send a custom event to the topic
 
