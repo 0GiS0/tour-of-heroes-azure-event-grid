@@ -11,6 +11,7 @@ app.post('/webhook', (req, res) => {
 
     switch (json.eventType) {
 
+        // https://learn.microsoft.com/es-es/azure/event-grid/webhook-event-delivery
         case 'Microsoft.EventGrid.SubscriptionValidationEvent':
             console.log('Validation event ✅ received');
             console.log(req.body);
