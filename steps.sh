@@ -11,6 +11,10 @@ NGROK_ENDPOINT="https://5698-89-7-164-45.ngrok-free.app/webhook"
 # Create resource group
 az group create --name $RESOURCE_GROUP --location $LOCATION
 
+##########################################################################################
+############################### Azure Services Events ####################################
+##########################################################################################
+
 # Azure Service Events
 STORAGE_RESOURCE_ID=$(az storage account create \
     --name $STORAGE_ACCOUNT_NAME \
@@ -50,6 +54,10 @@ az storage blob delete \
 --account-name $STORAGE_ACCOUNT_NAME \
 --account-key $STORAGE_ACCOUNT_KEY
 
+##########################################################################################
+###################################### Custom Events #####################################
+##########################################################################################
+
 
 # Create Event Grid Topic
 az eventgrid topic create \
@@ -78,13 +86,31 @@ az eventgrid event-subscription create \
     --endpoint $NGROK_ENDPOINT
 
 # Send a custom event to the topic
-
 EVENT_GRID_KEY=$(az eventgrid topic key list --name $EVENT_GRID_TOPIC -g $RESOURCE_GROUP --query "key1" --output tsv)
 EVENT_GRID_ENDPOINT=$(az eventgrid topic show --name $EVENT_GRID_TOPIC -g $RESOURCE_GROUP --query "endpoint" --output tsv)
 
 EVENT='[ {"id": "'"$RANDOM"'", "eventType": "recordInserted", "subject": "myapp/heroes/gotham", "eventTime": "'`date +%Y-%m-%dT%H:%M:%S%z`'", "data":{ "hero": "Batman", "genre": "male"},"dataVersion": "1.0"} ]'
 
 curl -X POST -H "aeg-sas-key: $EVENT_GRID_KEY" -d "$EVENT" $EVENT_GRID_ENDPOINT
+
+###########################################################################################
+###################################### MQTT ###############################################
+###########################################################################################
+
+# The Azure Event Grid MQTT broker feature supports messaging by using the MQTT protocol. 
+# Clients (both devices and cloud applications) can publish and subscribe to MQTT messages over flexible hierarchical topics for scenarios such as high-scale broadcast and command and control
+
+
+EVENT_GRID_MQTT_NS="event-grid-mqtt-ns"
+
+# Create Event Grid MQTT Namespace
+az eventgrid namespace create \
+-g $RESOURCE_GROUP \
+-n $EVENT_GRID_MQTT_NS \
+--topic-spaces-configuration "{state:Enabled}"
+
+
+
 
 time az group delete -n $RESOURCE_GROUP --yes
 
