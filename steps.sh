@@ -6,7 +6,7 @@ EVENT_GRID_SUBSCRIPTION="heroes-subscription"
 STORAGE_ACCOUNT_NAME="storeheroes"
 STORAGE_CONTAINER_NAME="pics"
 
-NGROK_ENDPOINT="https://5698-89-7-164-45.ngrok-free.app/webhook"
+NGROK_ENDPOINT="https://1103-89-7-164-45.ngrok-free.app/webhook"
 
 # Create resource group
 az group create --name $RESOURCE_GROUP --location $LOCATION
@@ -79,12 +79,6 @@ az eventgrid event-subscription create \
     --endpoint-type webhook \
     --endpoint $NGROK_ENDPOINT
 
-az eventgrid event-subscription create \
-    --name $EVENT_GRID_SUBSCRIPTION-2 \
-    --source-resource-id $TOPIC_RESOURCE_ID \
-    --endpoint-type webhook \
-    --endpoint $NGROK_ENDPOINT
-
 # Send a custom event to the topic
 EVENT_GRID_KEY=$(az eventgrid topic key list --name $EVENT_GRID_TOPIC -g $RESOURCE_GROUP --query "key1" --output tsv)
 EVENT_GRID_ENDPOINT=$(az eventgrid topic show --name $EVENT_GRID_TOPIC -g $RESOURCE_GROUP --query "endpoint" --output tsv)
@@ -109,6 +103,8 @@ az eventgrid namespace create \
 -n $EVENT_GRID_MQTT_NS \
 --topic-spaces-configuration "{state:Enabled}"
 
+# Create client
+az eventgrid namespace client create -g {Resource Group} --namespace-name {Namespace Name} -n {Client Name} --authentication-name client1-authnID --client-certificate-authentication "{validationScheme:ThumbprintMatch,allowed-thumbprints:[Client Thumbprint]}"
 
 
 
