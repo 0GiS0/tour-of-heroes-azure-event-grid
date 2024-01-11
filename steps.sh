@@ -6,7 +6,7 @@ EVENT_GRID_SUBSCRIPTION="heroes-subscription"
 STORAGE_ACCOUNT_NAME="storeheroes"
 STORAGE_CONTAINER_NAME="pics"
 
-NGROK_ENDPOINT="https://fcd8-89-7-164-45.ngrok-free.app/webhook"
+NGROK_ENDPOINT="https://5698-89-7-164-45.ngrok-free.app/webhook"
 
 # Create resource group
 az group create --name $RESOURCE_GROUP --location $LOCATION
@@ -21,18 +21,34 @@ STORAGE_RESOURCE_ID=$(az storage account create \
     --query "id" \
     --output tsv)
 
+STORAGE_ACCOUNT_KEY=$(az storage account keys list --account-name $STORAGE_ACCOUNT_NAME --query "[0].value" --output tsv)
+
 # Create a container
 az storage container create \
-    --name $STORAGE_CONTAINER_NAME \
-    --account-name $STORAGE_ACCOUNT_NAME \
-    --public-access blob
+--name $STORAGE_CONTAINER_NAME \
+--account-name $STORAGE_ACCOUNT_NAME \
+--account-key $STORAGE_ACCOUNT_KEY
 
-# Subscribe to Azure Storage Events
+# Subscribe to Azure Storage Events (Blob Created and Deleted)
 az eventgrid event-subscription create \
     --name $EVENT_GRID_SUBSCRIPTION \
     --source-resource-id $STORAGE_RESOURCE_ID \
     --endpoint-type webhook \
     --endpoint $NGROK_ENDPOINT
+
+# Upload a file to the container
+az storage blob upload \
+    --container-name $STORAGE_CONTAINER_NAME \
+    --file ./pics/arrow.jpeg \
+    --name arrow.jpeg \
+    --account-name $STORAGE_ACCOUNT_NAME
+
+# Delete a file from the container
+az storage blob delete \
+--container-name $STORAGE_CONTAINER_NAME \
+--name arrow.jpeg \
+--account-name $STORAGE_ACCOUNT_NAME \
+--account-key $STORAGE_ACCOUNT_KEY
 
 
 # Create Event Grid Topic
@@ -69,5 +85,8 @@ EVENT_GRID_ENDPOINT=$(az eventgrid topic show --name $EVENT_GRID_TOPIC -g $RESOU
 EVENT='[ {"id": "'"$RANDOM"'", "eventType": "recordInserted", "subject": "myapp/heroes/gotham", "eventTime": "'`date +%Y-%m-%dT%H:%M:%S%z`'", "data":{ "hero": "Batman", "genre": "male"},"dataVersion": "1.0"} ]'
 
 curl -X POST -H "aeg-sas-key: $EVENT_GRID_KEY" -d "$EVENT" $EVENT_GRID_ENDPOINT
+
+time az group delete -n $RESOURCE_GROUP --yes
+
 
 # https://learn.microsoft.com/en-us/azure/event-grid/quotas-limits
