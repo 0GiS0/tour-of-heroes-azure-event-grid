@@ -6,7 +6,20 @@ EVENT_GRID_SUBSCRIPTION="heroes-subscription"
 STORAGE_ACCOUNT_NAME="storeheroes"
 STORAGE_CONTAINER_NAME="pics"
 
-NGROK_ENDPOINT="https://1103-89-7-164-45.ngrok-free.app/webhook"
+NGROK_ENDPOINT="https://anteater-alive-gratefully.ngrok-free.app/webhook"
+
+# Install dependencies
+npm install
+
+# Start webhook
+node 00-webhook.js
+
+# https://dashboard.ngrok.com/get-started/your-authtoken
+ngrok config add-authtoken <YOUR_TOKEN>
+
+# Start ngrok
+ngrok http --domain=anteater-alive-gratefully.ngrok-free.app 3000
+
 
 # Create resource group
 az group create --name $RESOURCE_GROUP --location $LOCATION
@@ -94,7 +107,6 @@ curl -X POST -H "aeg-sas-key: $EVENT_GRID_KEY" -d "$EVENT" $EVENT_GRID_ENDPOINT
 # The Azure Event Grid MQTT broker feature supports messaging by using the MQTT protocol. 
 # Clients (both devices and cloud applications) can publish and subscribe to MQTT messages over flexible hierarchical topics for scenarios such as high-scale broadcast and command and control
 
-
 EVENT_GRID_MQTT_NS="event-grid-mqtt-ns"
 
 # Create Event Grid MQTT Namespace
@@ -112,7 +124,7 @@ step ca init --deployment-type standalone \
 --address 127.0.0.1:443 \
 --provisioner MqttAppSamplesCAProvisioner
 
-# Generated password: AmVBT=$5rpG7_Kw[<F\t(e_m5AS]u3fh
+# Generated password: yhHcz:e=_]CWW87S'krW'zZR(,saFiy~
 
 # 2. Use the certificate authority (CA) files generated to create a certificate for the client
 step certificate create client1-authnID client1-authnID.pem \
@@ -153,6 +165,9 @@ az eventgrid namespace permission-binding create \
 --client-group-name '$all' \
 --permission subscriber \
 --topic-space-name "autoslocos"
+
+# Send messages to heroes/gotham
+
 
 # https://github.com/Azure-Samples/MqttApplicationSamples
 

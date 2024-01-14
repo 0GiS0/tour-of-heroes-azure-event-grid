@@ -11,6 +11,19 @@
 		"ghcr.io/devcontainers/features/azure-cli:1": {},
 		"ghcr.io/jckimble/devcontainer-features/ngrok:3": {},
 		"ghcr.io/devcontainers/features/dotnet:2": {}
+	},
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				"tonybaloney.vscode-pets"
+			],
+			"settings": {
+				"vscode-pets.petType": "cat",
+				"vscode-pets.petSize": "medium"
+			}
+		}
 	}
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
