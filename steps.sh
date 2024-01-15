@@ -167,7 +167,8 @@ az eventgrid namespace permission-binding create \
 --topic-space-name "autoslocos"
 
 # Send messages to heroes/gotham
-
+cd client
+dotnet run
 
 # https://github.com/Azure-Samples/MqttApplicationSamples
 
